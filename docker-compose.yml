@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  redis-db:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+
+
+
