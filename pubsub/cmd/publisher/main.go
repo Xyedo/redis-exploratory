@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"log"
-	"redis-exploratory/pubsub"
+	"redis-exploratory/pkg/database"
 	"redis-exploratory/pubsub/publisher"
 	"time"
 )
 
 func main() {
-	c, err := pubsub.NewRedisClient(context.TODO())
+	c, err := database.NewRedisClient(context.TODO())
 	if err != nil {
 		panic(err)
 	}

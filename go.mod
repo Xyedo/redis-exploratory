@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/go-faker/faker/v4 v4.1.1
+	github.com/google/uuid v1.3.0
 	github.com/redis/go-redis/v9 v9.0.5
 )
 

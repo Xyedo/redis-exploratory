@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"log"
-	"redis-exploratory/queue"
+	"redis-exploratory/pkg/database"
 	"redis-exploratory/queue/consumer"
 	"time"
 )
 
 func main() {
-	redisClient, err := queue.NewRedisClient(context.TODO())
+	redisClient, err := database.NewRedisClient(context.TODO())
 	if err != nil {
 		panic(err)
 	}

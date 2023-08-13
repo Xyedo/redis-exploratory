@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"redis-exploratory/pubsub"
+	"redis-exploratory/pkg/database"
 	"redis-exploratory/pubsub/subscriber"
 	"syscall"
 	"time"
@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	c, err := pubsub.NewRedisClient(context.TODO())
+	c, err := database.NewRedisClient(context.TODO())
 	if err != nil {
 		panic(err)
 	}
