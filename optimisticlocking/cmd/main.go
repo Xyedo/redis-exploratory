@@ -5,10 +5,8 @@ import (
 	"log"
 	"redis-exploratory/optimisticlocking"
 	"redis-exploratory/pkg/database"
+	"strconv"
 	"time"
-
-	"github.com/go-faker/faker/v4"
-	"github.com/go-faker/faker/v4/pkg/options"
 )
 
 func main() {
@@ -17,15 +15,15 @@ func main() {
 		panic(err)
 	}
 
-	client := 4
+	client := 100
 	userIds := make([]string, client)
 	for i := range userIds {
-		userIds[i] = faker.Name(options.WithRandomMapAndSliceMinSize(uint(client)))
+		userIds[i] = strconv.Itoa(i)
 	}
 
 	o := optimisticlocking.New(c)
-	errChan := make(chan error)
-	userIdChan := make(chan string)
+	errChan := make(chan error, client)
+	userIdChan := make(chan string, client)
 	for {
 		select {
 		case err, ok := <-errChan:
@@ -41,13 +39,18 @@ func main() {
 
 		for i := range userIds {
 			go func(i int) {
-				userId, err := o.ChangeCurrentGet(userIds[i])
+				log.Printf("user-%d wanna change the bid\n", i)
+				err := o.ChangeCurrentGet(userIds[i], func(s string) error {
+					if s != "" {
+						userIdChan <- userIds[i]
+					}
+
+					return nil
+				})
 				if err != nil {
 					errChan <- err
 				}
-				if userId != "" {
-					userIdChan <- userId
-				}
+
 			}(i)
 		}
 		time.Sleep(1 * time.Second)
