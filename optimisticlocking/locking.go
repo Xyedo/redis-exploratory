@@ -11,6 +11,7 @@ import (
 
 var ErrAlreadyTaken = errors.New("key is already taken")
 var ErrExpiredLock = errors.New("key is already expired")
+var ErrLockNotFound = errors.New("key is not found")
 
 func New(rdb *redis.Client) *Optimistic {
 	return &Optimistic{
@@ -54,6 +55,10 @@ func (self Optimistic) release(ctx context.Context, key string) error {
 
 	if status == -1 {
 		return ErrExpiredLock
+	}
+
+	if status == 0 {
+		return ErrLockNotFound
 	}
 
 	return nil

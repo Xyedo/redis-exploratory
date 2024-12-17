@@ -9,26 +9,32 @@ import (
 	"time"
 )
 
+type clientErrorPair struct {
+	clientId string
+	err      error
+}
+
 func main() {
 	c, err := database.NewRedisClient(context.TODO())
 	if err != nil {
 		panic(err)
 	}
 
-	client := 100
+	client := 100_000
+	log.Printf("concurent user who want to bid is %d\n", client)
 	userIds := make([]string, client)
 	for i := range userIds {
 		userIds[i] = strconv.Itoa(i)
 	}
 
 	o := optimisticlocking.New(c)
-	errChan := make(chan error, client)
-	userIdChan := make(chan string, client)
+	errChan := make(chan clientErrorPair, client)
+	userIdChan := make(chan string)
 	for {
 		select {
-		case err, ok := <-errChan:
+		case pair, ok := <-errChan:
 			if ok {
-				log.Println(err)
+				log.Printf("user %s trying to bid, but %v\n", pair.clientId, pair.err)
 			}
 		case userId, ok := <-userIdChan:
 			if ok {
@@ -39,7 +45,6 @@ func main() {
 
 		for i := range userIds {
 			go func(i int) {
-				log.Printf("user-%d wanna change the bid\n", i)
 				err := o.ChangeCurrentGet(userIds[i], func(s string) error {
 					if s != "" {
 						userIdChan <- userIds[i]
@@ -48,7 +53,10 @@ func main() {
 					return nil
 				})
 				if err != nil {
-					errChan <- err
+					errChan <- clientErrorPair{
+						clientId: userIds[i],
+						err:      err,
+					}
 				}
 
 			}(i)
