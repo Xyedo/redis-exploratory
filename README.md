@@ -12,3 +12,5 @@ It using Publisher and Consumer with Pull Based based on lastId
 
 ### Optimistic-Locking like auction app with thousand client trying to change to current bid
 It use WATCH CLI and whenever the watched value key is changed the other client get aborted and return error redis.Nil
+
+## Still Learnin...
